@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AND_XiaoHui</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #0a0e17;
+            color: #fff;
+            line-height: 1.6;
+            padding-bottom: 60px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 星空银河背景 */
+        #stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* 银河效果 */
+        #galaxy {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(56, 29, 99, 0.4) 0%, rgba(10, 14, 23, 0) 70%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 40px 0 25px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #6a5acd, transparent);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(106, 90, 205, 0.7);
+            background: linear-gradient(45deg, #fff, #6a5acd, #9370db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b19cd9;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* 紧凑排列的足迹卡片容器 */
+        .footprints-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0; /* 无间隙 */
+            margin-bottom: 40px;
+            min-height: 200px;
+        }
+        
+        /* 空状态提示 */
+        .empty-state {
+            text-align: center;
+            width: 100%;
+            padding: 60px 20px;
+            color: #8a7bb0;
+            font-size: 1.1rem;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            color: #6a5acd;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #b19cd9;
+        }
+        
+        .empty-text {
+            font-size: 1rem;
+            max-width: 500px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+        
+        /* 足迹卡片样式 - 紧凑排列 */
+        .footprint-card {
+            background: rgba(20, 25, 40, 0.8);
+            border: 1px solid rgba(106, 90, 205, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            min-width: 250px;
+            max-width: 400px;
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 让卡片紧密贴在一起 */
+        .footprint-card {
+            margin: 0 -1px -1px 0; /* 负边距让边框重叠 */
+        }
+        
+        .footprint-card:hover {
+            z-index: 10;
+            background: rgba(30, 35, 50, 0.9);
+            box-shadow: 0 4px 20px rgba(106, 90, 205, 0.3);
+            border-color: rgba(106, 90, 205, 0.6);
+            transform: translateY(-3px);
+        }
+        
+        /* 卡片发光效果 */
+        .footprint-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 30%, rgba(106, 90, 205, 0.05) 100%);
+            z-index: -1;
+        }
+        
+        /* 有图片的卡片样式 */
+        .footprint-card.has-image .card-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            z-index: 2;
+        }
+        
+        .footprint-card.has-image .card-header .timestamp {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .footprint-card.has-image .content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            z-index: 2;
+            margin-bottom: 0;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 18px 18px 0 18px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .username {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        
+        .timestamp {
+            font-size: 0.8rem;
+            color: #b19cd9;
+            background-color: rgba(106, 90, 205, 0.15);
+            padding: 4px 10px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+        
+        .content {
+            font-size: 0.95rem;
+            color: #d8c3ff;
+            line-height: 1.5;
+            flex-grow: 1;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            margin-bottom: 10px;
+            padding: 0 18px 18px 18px;
+        }
+        
+        /* 无内容提示 */
+        .no-content {
+            font-style: italic;
+            color: #8a7bb0;
+            font-size: 0.9rem;
+            padding: 0 18px 18px 18px;
+        }
+        
+        /* 图片容器 */
+        .image-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .footprint-card:hover .card-image {
+            transform: scale(1.05);
+        }
+        
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #b19cd9;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+        
+        .image-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+        
+        /* 卡片尺寸根据内容自适应 */
+        .short {
+            width: 250px;
+            height: 250px;
+        }
+        
+        .medium {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .long {
+            width: 350px;
+            height: 350px;
+        }
+        
+        .extra-long {
+            width: 400px;
+            height: 400px;
+        }
+        
+        /* 纯文字卡片 */
+        .text-only {
+            width: 280px;
+            min-height: 180px;
+            max-height: 250px;
+        }
+        
+        /* 发布按钮区域 */
+        .publish-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+        
+        .publish-btn {
+            background: linear-gradient(135deg, #6a5acd, #9370db);
+            color: white;
+            border: none;
+            padding: 14px 36px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(106, 90, 205, 0.3);
+        }
+        
+        .publish-btn:hover {
+            background: linear-gradient(135deg, #7b68ee, #a990e8);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(106, 90, 205, 0.4);
+        }
+        
+        .publish-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 发布表单 */
+        .publish-form {
+            background: rgba(20, 25, 40, 0.95);
+            border: 1px solid rgba(106, 90, 205, 0.4);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+            width: 90%;
+            max-width: 550px;
+            display: none;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-header h3 {
+            color: #fff;
+            font-size: 1.4rem;
+            background: linear-gradient(45deg, #fff, #6a5acd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #b19cd9;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .close-btn:hover {
+            color: #ff9eec;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d8c3ff;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(10, 15, 30, 0.8);
+            border: 1px solid rgba(106, 90, 205, 0.4);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            color: #fff;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #6a5acd;
+            box-shadow: 0 0 0 2px rgba(106, 90, 205, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* 图片上传样式 */
+        .image-upload-container {
+            border: 2px dashed rgba(106, 90, 205, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: rgba(10, 15, 30, 0.5);
+        }
+        
+        .image-upload-container:hover {
+            border-color: #6a5acd;
+            background: rgba(10, 15, 30, 0.7);
+        }
+        
+        .image-upload-container.drag-over {
+            border-color: #9370db;
+            background: rgba(147, 112, 219, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #6a5acd;
+            margin-bottom: 10px;
+        }
+        
+        .upload-text {
+            color: #b19cd9;
+            margin-bottom: 5px;
+        }
+        
+        .upload-subtext {
+            color: #8a7bb0;
+            font-size: 0.9rem;
+        }
+        
+        #imagePreview {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        #previewImage {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            border: 1px solid rgba(106, 90, 205, 0.3);
+        }
+        
+        .remove-image {
+            margin-top: 10px;
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        
+        .remove-image:hover {
+            background: rgba(220, 53, 69, 0.3);
+        }
+        
+        /* 表单提示 */
+        .form-hint {
+            color: #8a7bb0;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #6a5acd, #9370db);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #7b68ee, #a990e8);
+        }
+        
+        .submit-btn:disabled {
+            background: #5a5a7a;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        /* 底部信息 */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #b19cd9;
+            border-top: 1px solid rgba(106, 90, 205, 0.2);
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.3rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                padding: 0 15px;
+            }
+            
+            .footprints-container {
+                justify-content: center;
+            }
+            
+            .footprint-card {
+                min-width: 90%;
+                margin: 0 0 -1px 0; /* 移动端恢复正常边距 */
+            }
+            
+            .publish-form {
+                width: 95%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .footprint-card {
+                min-width: 100%;
+            }
+        }
+        
+        /* 流星效果 */
+        .meteor {
+            position: fixed;
+            top: 0;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px white;
+            z-index: -1;
+            opacity: 0;
+        }
+        
+        @keyframes meteor {
+            0% {
+                opacity: 1;
+                transform: translateX(0) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-300px) translateY(300px);
+            }
+        }
+        
+        /* 通知提示 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: rgba(20, 25, 40, 0.95);
+            border-left: 4px solid #6a5acd;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-icon {
+            color: #6a5acd;
+            font-size: 1.2rem;
+        }
+        
+        .notification-text {
+            color: #fff;
+            font-size: 0.95rem;
+        }
+        
+        /* 加载更多按钮 */
+        .load-more {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .load-more-btn {
+            background: rgba(106, 90, 205, 0.2);
+            color: #b19cd9;
+            border: 1px solid rgba(106, 90, 205, 0.4);
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .load-more-btn:hover {
+            background: rgba(106, 90, 205, 0.3);
+            color: #fff;
+        }
+        
+        .load-more-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(106, 90, 205, 0.3);
+            border-radius: 50%;
+            border-top-color: #6a5acd;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 23, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            display: none;
+        }
+        
+        .loading-text {
+            color: #b19cd9;
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div id="stars"></div>
+    
+    <!-- 银河效果 -->
+    <div id="galaxy"></div>
+    
+    <!-- 流星容器 -->
+    <div id="meteors"></div>
+    
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">加载中...</div>
+        </div>
+    </div>
+    
+    <!-- 通知提示 -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="notification-text" id="notificationText">足迹发布成功！</div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>2025最后足迹</h1>
+            <p class="subtitle">AND_XiaoHui</p>
+        </header>
+        
+        <main>
+            <!-- 足迹卡片容器 -->
+            <div class="footprints-container" id="footprintsContainer">
+                <!-- 空状态提示 -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="empty-title">足迹墙是空的</div>
+                    <div class="empty-text">还没有人留下足迹，点击下方按钮发布第一个足迹吧！你可以上传图片或写下文字，分享你的美好时刻。</div>
+                </div>
+                <!-- 足迹卡片将通过JavaScript动态生成 -->
+            </div>
+            
+            <!-- 加载更多按钮 -->
+            <div class="load-more" id="loadMoreSection" style="display: none;">
+                <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreFootprints()">加载更多足迹</button>
+                <div id="loadAll" style="margin-top: 10px; color: #8a7bb0; font-size: 0.9rem;"></div>
+            </div>
+            
+            <!-- 发布足迹区域 -->
+            <div class="publish-section">
+                <button class="publish-btn" id="publishBtn">
+                    <i class="fas fa-plus-circle"></i> 发布第一个足迹
+                </button>
+                
+                <div class="publish-form" id="publishForm">
+                    <div class="form-header">
+                        <h3>发布新足迹</h3>
+                        <button class="close-btn" id="closeFormBtn">&times;</button>
+                    </div>
+                    
+                    <form id="newFootprintForm">
+                        <div class="form-group">
+                            <label for="userName">你的名字</label>
+                            <input type="text" id="userName" class="form-control" placeholder="请输入你的名字" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="footprintContent">足迹内容 (可选)</label>
+                            <textarea id="footprintContent" class="form-control" placeholder="为你的图片添加描述..."></textarea>
+                            <div class="form-hint">建议上传图片，图片将成为足迹卡片的主要展示内容</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="imageUpload">上传图片 (推荐)</label>
+                            <div class="image-upload-container" id="imageUploadContainer">
+                                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="upload-text">点击或拖拽上传图片</div>
+                                <div class="upload-subtext">支持 JPG, PNG, GIF 格式，最大 5MB</div>
+                            </div>
+                            <div id="imagePreview">
+                                <img id="previewImage" src="" alt="图片预览">
+                                <button type="button" class="remove-image" id="removeImage">移除图片</button>
+                            </div>
+                            <div class="form-hint">上传的图片将成为足迹卡片的主要展示内容</div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="submitBtn">留下足迹</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>©AND_XiaoHui 2025 共同创造属于我们的记忆星空</p>
+        </footer>
+    </div>
+
+    <script>
+        // API基础URL - 根据实际部署修改
+        const API_BASE_URL = window.location.origin; // 同源
+        const FOOTPRINTS_API = `${API_BASE_URL}/api/footprints`;
+        
+        // 足迹数据（从后端获取）
+        let footprintsData = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let isLoading = false;
+        
+        // 获取DOM元素
+        const footprintsContainer = document.getElementById('footprintsContainer');
+        const emptyState = document.getElementById('emptyState');
+        const publishBtn = document.getElementById('publishBtn');
+        const publishForm = document.getElementById('publishForm');
+        const closeFormBtn = document.getElementById('closeFormBtn');
+        const newFootprintForm = document.getElementById('newFootprintForm');
+        const loadMoreSection = document.getElementById('loadMoreSection');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadAll = document.getElementById('loadAll');
+        const starsContainer = document.getElementById('stars');
+        const imageUpload = document.getElementById('imageUpload');
+        const imageUploadContainer = document.getElementById('imageUploadContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImage = document.getElementById('previewImage');
+        const removeImageBtn = document.getElementById('removeImage');
+        const meteorsContainer = document.getElementById('meteors');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        
+        // 当前上传的图片数据
+        let currentImageData = null;
+
+        // 显示/隐藏加载遮罩
+        function showLoading(message = '加载中...') {
+            loadingText.textContent = message;
+            loadingOverlay.style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        // 根据内容长度和是否有图片确定卡片尺寸类
+        function getCardSizeClass(content, hasImage) {
+            if (hasImage) {
+                // 有图片的卡片，根据内容长度决定卡片大小
+                const length = content ? content.length : 0;
+                if (length < 30) return 'short';
+                if (length < 60) return 'medium';
+                if (length < 90) return 'long';
+                return 'extra-long';
+            } else {
+                // 没有图片的卡片，设置为文字卡片
+                return 'text-only';
+            }
+        }
+
+        // 格式化时间
+        function formatTime(timestamp) {
+            const now = new Date();
+            const date = new Date(timestamp);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 1) return "刚刚";
+            if (diffMins < 60) return `${diffMins}分钟前`;
+            if (diffHours < 24) return `${diffHours}小时前`;
+            if (diffDays < 7) return `${diffDays}天前`;
+            
+            // 超过一周显示具体日期
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // 生成足迹卡片
+        function generateFootprintCard(footprint) {
+            const hasImage = !!footprint.imageUrl;
+            const sizeClass = getCardSizeClass(footprint.content, hasImage);
+            const timeAgo = formatTime(footprint.timestamp);
+            
+            // 处理图片URL，确保是完整URL
+            let imageUrl = footprint.imageUrl;
+            if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+                // 如果是相对路径，加上基础URL
+                imageUrl = API_BASE_URL + imageUrl;
+            }
+            
+            // 有图片的卡片
+            if (hasImage) {
+                const contentHTML = footprint.content 
+                    ? `<div class="content">${footprint.content}</div>`
+                    : `<div class="no-content">此足迹没有文字描述</div>`;
+                
+                return `
+                    <div class="footprint-card has-image ${sizeClass}">
+                        <div class="card-header">
+                            <div class="user-info">
+                                <span class="username">${footprint.userName}</span>
+                            </div>
+                            <span class="timestamp" title="${footprint.timestamp}">${timeAgo}</span>
+                        </div>
+                        <div class="image-container">
+                            <img src="${imageUrl}" alt="足迹图片" class="card-image" loading="lazy">
+                        </div>
+                        ${contentHTML}
+                    </div>
+                `;
+            } 
+            // 没有图片的卡片（纯文字）
+            else {
+                const contentHTML = footprint.content 
+                    ? `<div class="content">${footprint.content}</div>`
+                    : `<div class="no-content">此足迹没有内容</div>`;
+                
+                return `
+                    <div class="footprint-card ${sizeClass}">
+                        <div class="card-header">
+                            <div class="user-info">
+                                <span class="username">${footprint.userName}</span>
+                            </div>
+                            <span class="timestamp" title="${footprint.timestamp}">${timeAgo}</span>
+                        </div>
+                        ${contentHTML}
+                    </div>
+                `;
+            }
+        }
+
+        // 从后端获取足迹数据
+        async function fetchFootprints(page = 1, pageSize = 20) {
+            if (isLoading) return;
+            
+            try {
+                isLoading = true;
+                if (page === 1) {
+                    showLoading('加载足迹中...');
+                } else {
+                    loadMoreBtn.disabled = true;
+                    loadMoreBtn.innerHTML = '<span class="loading-spinner"></span>加载中...';
+                }
+                
+                const response = await fetch(`${FOOTPRINTS_API}?page=${page}&page_size=${pageSize}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    return result;
+                } else {
+                    throw new Error(result.message || '获取足迹失败');
+                }
+            } catch (error) {
+                console.error('获取足迹失败:', error);
+                showNotification('获取足迹失败: ' + error.message, true);
+                return null;
+            } finally {
+                isLoading = false;
+                if (page === 1) {
+                    hideLoading();
+                } else {
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.innerHTML = '加载更多足迹';
+                }
+            }
+        }
+
+        // 渲染足迹卡片
+        function renderFootprints() {
+            footprintsContainer.innerHTML = '';
+            
+            // 如果没有足迹，显示空状态
+            if (footprintsData.length === 0) {
+                emptyState.style.display = 'block';
+                loadMoreSection.style.display = 'none';
+                publishBtn.innerHTML = '<i class="fas fa-plus-circle"></i> 发布第一个足迹';
+                return;
+            }
+            
+            // 有足迹，隐藏空状态
+            emptyState.style.display = 'none';
+            
+            // 生成卡片
+            footprintsData.forEach(footprint => {
+                const cardHTML = generateFootprintCard(footprint);
+                footprintsContainer.innerHTML += cardHTML;
+            });
+            
+            // 更新底部提示
+            if (currentPage >= totalPages) {
+                loadAll.textContent = `已加载全部足迹（共 ${footprintsData.length} 条）`;
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.textContent = '没有更多了';
+            } else {
+                loadAll.textContent = `已加载 ${footprintsData.length} 条足迹`;
+                loadMoreSection.style.display = 'block';
+            }
+            
+            // 更新发布按钮文字
+            publishBtn.innerHTML = '<i class="fas fa-plus-circle"></i> 发布足迹';
+        }
+
+        // 加载更多足迹
+        async function loadMoreFootprints() {
+            if (currentPage >= totalPages || isLoading) return;
+            
+            currentPage++;
+            const result = await fetchFootprints(currentPage);
+            
+            if (result && result.success) {
+                footprintsData = [...footprintsData, ...result.data];
+                totalPages = result.pagination.total_pages;
+                renderFootprints();
+                
+                // 平滑滚动到新加载的内容
+                const cards = document.querySelectorAll('.footprint-card');
+                if (cards.length > 0) {
+                    cards[cards.length - result.data.length].scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, isError = false) {
+            notificationText.textContent = message;
+            
+            if (isError) {
+                notification.style.borderLeftColor = '#ff6b6b';
+                notification.querySelector('.notification-icon').innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+            } else {
+                notification.style.borderLeftColor = '#6a5acd';
+                notification.querySelector('.notification-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+            }
+            
+            notification.classList.add('show');
+            
+            // 3秒后隐藏通知
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 显示/隐藏发布表单
+        publishBtn.addEventListener('click', () => {
+            const isFormVisible = publishForm.style.display === 'block';
+            publishForm.style.display = isFormVisible ? 'none' : 'block';
+            
+            // 滚动到表单位置
+            if (!isFormVisible) {
+                publishForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+
+        // 关闭发布表单
+        closeFormBtn.addEventListener('click', () => {
+            publishForm.style.display = 'none';
+            resetForm();
+        });
+
+        // 重置表单
+        function resetForm() {
+            newFootprintForm.reset();
+            imagePreview.style.display = 'none';
+            previewImage.src = '';
+            currentImageData = null;
+            submitBtn.disabled = false;
+            submitBtn.textContent = '发布足迹';
+        }
+
+        // 图片上传处理
+        imageUploadContainer.addEventListener('click', () => {
+            imageUpload.click();
+        });
+        
+        // 拖拽上传功能
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            imageUploadContainer.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            imageUploadContainer.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            imageUploadContainer.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            imageUploadContainer.classList.add('drag-over');
+        }
+        
+        function unhighlight() {
+            imageUploadContainer.classList.remove('drag-over');
+        }
+        
+        // 处理文件放置
+        imageUploadContainer.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+        
+        // 处理文件选择
+        imageUpload.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+        
+        // 处理文件
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            
+            // 检查文件类型
+            if (!file.type.match('image.*')) {
+                showNotification('请选择图片文件！', true);
+                return;
+            }
+            
+            // 检查文件大小（5MB限制）
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('图片大小不能超过5MB！', true);
+                return;
+            }
+            
+            // 预览图片
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+                currentImageData = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // 移除图片
+        removeImageBtn.addEventListener('click', () => {
+            imagePreview.style.display = 'none';
+            previewImage.src = '';
+            currentImageData = null;
+            imageUpload.value = '';
+        });
+
+        // 验证表单
+        function validateForm() {
+            const userName = document.getElementById('userName').value.trim();
+            const content = document.getElementById('footprintContent').value.trim();
+            
+            // 验证用户名必填
+            if (!userName) {
+                showNotification('请填写你的名字！', true);
+                return false;
+            }
+            
+            // 验证内容和图片至少有一个
+            if (!content && !currentImageData) {
+                showNotification('请至少填写足迹内容或上传一张图片！', true);
+                return false;
+            }
+            
+            return true;
+        }
+
+        // 提交新足迹到后端
+        async function submitFootprintToBackend(userName, content, imageData) {
+            try {
+                const payload = {
+                    userName: userName,
+                    content: content,
+                    imageData: imageData
+                };
+                
+                const response = await fetch(FOOTPRINTS_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    return result.data;
+                } else {
+                    throw new Error(result.message || '发布失败');
+                }
+            } catch (error) {
+                console.error('发布足迹失败:', error);
+                throw error;
+            }
+        }
+
+        // 提交新足迹
+        newFootprintForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // 验证表单
+            if (!validateForm()) {
+                return;
+            }
+            
+            const userName = document.getElementById('userName').value.trim();
+            const content = document.getElementById('footprintContent').value.trim();
+            
+            // 禁用提交按钮防止重复提交
+            submitBtn.disabled = true;
+            submitBtn.textContent = '发布中...';
+            
+            try {
+                // 提交到后端
+                showLoading('发布足迹中...');
+                const newFootprint = await submitFootprintToBackend(userName, content, currentImageData);
+                
+                // 重新从第一页获取足迹数据
+                const result = await fetchFootprints(1);
+                if (result && result.success) {
+                    footprintsData = result.data;
+                    currentPage = 1;
+                    totalPages = result.pagination.total_pages;
+                    renderFootprints();
+                }
+                
+                // 重置表单
+                resetForm();
+                
+                // 隐藏表单
+                publishForm.style.display = 'none';
+                
+                // 显示成功提示
+                showNotification('足迹发布成功！');
+                
+                // 滚动到顶部查看新发布的足迹
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+            } catch (error) {
+                showNotification('发布失败: ' + error.message, true);
+            } finally {
+                // 恢复提交按钮
+                submitBtn.disabled = false;
+                submitBtn.textContent = '发布足迹';
+                hideLoading();
+            }
+        });
+
+        // 创建星空背景
+        function createStars() {
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // 随机大小
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // 随机位置
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // 随机闪烁延迟
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // 创建流星效果
+        function createMeteor() {
+            const meteor = document.createElement('div');
+            meteor.classList.add('meteor');
+            
+            // 随机位置
+            const startX = Math.random() * 100 + 50;
+            const startY = Math.random() * 50;
+            
+            meteor.style.left = `${startX}%`;
+            meteor.style.top = `${startY}%`;
+            
+            // 随机大小
+            const size = Math.random() * 2 + 1;
+            meteor.style.width = `${size}px`;
+            meteor.style.height = `${size}px`;
+            
+            // 动画
+            meteor.style.animation = `meteor ${Math.random() * 2 + 1}s linear forwards`;
+            
+            meteorsContainer.appendChild(meteor);
+            
+            // 动画结束后移除流星
+            setTimeout(() => {
+                meteor.remove();
+            }, 3000);
+        }
+        
+        // 定时生成流星
+        function startMeteorShower() {
+            // 初始创建几个流星
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => createMeteor(), i * 1000);
+            }
+            
+            // 每隔一段时间创建新的流星
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    createMeteor();
+                }
+            }, 3000);
+        }
+
+        // 初始化加载足迹
+        async function initFootprints() {
+            const result = await fetchFootprints(1);
+            if (result && result.success) {
+                footprintsData = result.data;
+                totalPages = result.pagination.total_pages;
+                renderFootprints();
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            createStars();
+            startMeteorShower();
+            await initFootprints();
+            
+            // 添加滚动监听，实现无限滚动
+            window.addEventListener('scroll', () => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                    if (currentPage < totalPages && !isLoading) {
+                        loadMoreFootprints();
+                    }
+                }
+            });
+        });
+
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', (e) => {
+            // ESC键关闭表单
+            if (e.key === 'Escape' && publishForm.style.display === 'block') {
+                publishForm.style.display = 'none';
+                resetForm();
+            }
+            
+            // Ctrl+Enter 提交表单
+            if (e.ctrlKey && e.key === 'Enter' && publishForm.style.display === 'block') {
+                document.getElementById('submitBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
